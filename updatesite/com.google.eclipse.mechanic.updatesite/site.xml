@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.google.eclipse.mechanic_0.4.0.jar" id="com.google.eclipse.mechanic" version="0.4.0">
+      <category name="WorkspaceMechanic"/>
+   </feature>
+   <category-def name="WorkspaceMechanic" label="WorkspaceMechanic">
+      <description>
+         by rsiccho
+      </description>
+   </category-def>
+</site>
