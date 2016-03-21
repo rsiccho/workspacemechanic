@@ -28,7 +28,7 @@ public class MechanicPreferencesInitializer extends AbstractPreferenceInitialize
     store.setDefault(IMechanicPreferences.DIRS_PREF, DEFAULT_DIRS);
     store.setDefault(IMechanicPreferences.SLEEPAGE_PREF, DEFAULT_SLEEP_SECONDS);
     store.setDefault(IMechanicPreferences.HELP_URL_PREF,
-        "http://code.google.com/a/eclipselabs.org/p/workspacemechanic/wiki/GettingStarted");
+        "https://github.com/rsiccho/workspacemechanic/blob/wiki/ProjectHome.md");
     store.setDefault(IMechanicPreferences.SHOW_POPUP_PREF, true);
   }
 

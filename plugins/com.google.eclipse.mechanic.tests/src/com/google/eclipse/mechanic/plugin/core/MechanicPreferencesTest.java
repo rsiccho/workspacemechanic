@@ -33,7 +33,7 @@ public class MechanicPreferencesTest extends TestCase {
   public void testGetHelpUrl() {
     setToDefault(IMechanicPreferences.HELP_URL_PREF);
     assertEquals(
-        "http://code.google.com/a/eclipselabs.org/p/workspacemechanic/wiki/GettingStarted",
+        "https://github.com/rsiccho/workspacemechanic/blob/wiki/ProjectHome.md",
         mechanicPreferences.getHelpUrl());
   }
 
