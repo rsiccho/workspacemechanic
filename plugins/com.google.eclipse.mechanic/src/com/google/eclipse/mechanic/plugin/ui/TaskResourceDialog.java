@@ -24,11 +24,10 @@ import org.eclipse.swt.widgets.Shell;
 public class TaskResourceDialog extends InputDialog {
 
   private static final int ID_BROWSE_BUTTON = 100;
+  private String lastSelectedDirectory;
 
   public TaskResourceDialog(Shell shell, boolean allowUrls) {
-    super(shell, "Task source",
-        (allowUrls ? "Enter a local directory or URL" : "Enter a local directory"),
-        "", new TaskResourceValidator(allowUrls));
+    super(shell, "Task source", (allowUrls ? "Enter a local directory or URL" : "Enter a local directory"), "", new TaskResourceValidator(allowUrls));
   }
 
   @Override
@@ -47,21 +46,22 @@ public class TaskResourceDialog extends InputDialog {
     String currentValue = getText().getText();
     if (currentValue != null && new File(currentValue).isDirectory()) {
       dialog.setFilterPath(currentValue);
+    } else if (lastSelectedDirectory != null && new File(lastSelectedDirectory).isDirectory()) {
+      dialog.setFilterPath(lastSelectedDirectory);
     }
+    
     String newValue = dialog.open();
     if (newValue != null) {
       getText().setText(newValue);
+      lastSelectedDirectory = newValue;
     }
   }
 
   @Override
   protected void createButtonsForButtonBar(Composite parent) {
-    createButton(parent, ID_BROWSE_BUTTON,
-        "Browse Filesystem...",
-        false);
+    createButton(parent, ID_BROWSE_BUTTON, "Browse Filesystem...", false);
     super.createButtonsForButtonBar(parent);
   }
-
 
   @Override
   protected Control createDialogArea(Composite parent) {

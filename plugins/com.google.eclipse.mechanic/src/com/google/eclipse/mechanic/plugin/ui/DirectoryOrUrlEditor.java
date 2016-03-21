@@ -24,6 +24,7 @@ public class DirectoryOrUrlEditor extends ListEditor {
 
   private static final ResourceTaskProviderParser parser =
       new ResourceTaskProviderParser(VariableManagerStringParser.INSTANCE);
+  private TaskResourceDialog dialog;
 
   public DirectoryOrUrlEditor(String name, String labelText, Composite parent) {
     init(name, labelText);
@@ -35,7 +36,9 @@ public class DirectoryOrUrlEditor extends ListEditor {
 
   @Override
   protected String getNewInputObject() {
-    TaskResourceDialog dialog = new TaskResourceDialog(getShell(), true);
+    if (dialog == null) {
+      dialog = new TaskResourceDialog(getShell(), true);
+    }
     return (dialog.open() == Dialog.OK) ? dialog.getValue() : null;
   }
 
