@@ -24,6 +24,7 @@ public class EpfFileModel {
   private final String title;
   private final String description;
   private final TaskType taskType;
+  private final XMLMode xmlMode;
   private final Map<String, String> preferences = new HashMap<String, String>();
   
   /**
@@ -32,14 +33,17 @@ public class EpfFileModel {
    * @param description the description of this task. Listed in the 
    *     @description field.
    * @param taskType the type of task to create.
+   *  @param xmlMode the xml mode to use
    */
   public EpfFileModel(
       String title, 
       String description, 
-      TaskType taskType) {
+      TaskType taskType, 
+      XMLMode xmlMode) {
     this.title = Preconditions.checkNotNull(title);
     this.description = Preconditions.checkNotNull(description);
     this.taskType = Preconditions.checkNotNull(taskType);
+    this.xmlMode = Preconditions.checkNotNull(xmlMode);
   }
   
   /**
@@ -65,6 +69,10 @@ public class EpfFileModel {
 
   public TaskType getTaskType() {
     return taskType;
+  }
+
+  public XMLMode getXmlMode() {
+    return xmlMode;
   }
 
   public Map<String, String> getPreferences() {
