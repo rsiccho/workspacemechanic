@@ -21,12 +21,15 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IExportedPreferences;
 import org.eclipse.core.runtime.preferences.IPreferenceFilter;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import com.google.common.base.Preconditions;
+import com.google.eclipse.mechanic.internal.CustomTemplateMerger;
+import com.google.eclipse.mechanic.internal.XMLMode;
 import com.google.eclipse.mechanic.plugin.core.IMechanicPreferences;
 import com.google.eclipse.mechanic.plugin.core.MechanicLog;
 
@@ -46,14 +49,22 @@ public abstract class LastModifiedPreferencesFileTask extends CompositeTask {
   private final String id;
   private final String key;
   private final String md5Key;
+  private XMLMode xmlMode;
 
   public LastModifiedPreferencesFileTask(
       IResourceTaskReference taskRef,
       IMechanicPreferences prefs,
       MechanicLog log) {
+    this(taskRef, prefs, log, XMLMode.OVERWRITE);
+  }
+
+  public LastModifiedPreferencesFileTask(IResourceTaskReference taskRef,
+      IMechanicPreferences prefs,
+      MechanicLog log, XMLMode xmlMode) {
     this.taskRef = taskRef;
     this.prefs = prefs;
     this.log = log;
+    this.xmlMode = xmlMode;
     this.file = taskRef.asFile();
     Preconditions.checkArgument(file == null || file.canRead(), file + " must be readable");
     this.id = String.format("%s@%s", getClass().getName(), taskRef.getPath());
@@ -152,12 +163,22 @@ public abstract class LastModifiedPreferencesFileTask extends CompositeTask {
 
     IPreferencesService service = Platform.getPreferencesService();
     try {
-      IExportedPreferences prefs = service.readPreferences(input);
+      IExportedPreferences newPrefs = service.readPreferences(input);
+
+      if (XMLMode.MERGE.equals(xmlMode)) {
+        IEclipsePreferences oldPrefs = Platform.getPreferencesService().getRootNode();
+        new CustomTemplateMerger(newPrefs, oldPrefs).mergeCustomTemplates();
+      }
+
       // Apply the prefs with the filters so they're only imported and others aren't removed.
-      service.applyPreferences(prefs, filters);
+      service.applyPreferences(newPrefs, filters);
     } catch (CoreException ex) {
       log.log(ex.getStatus());
     }
     
   }
+
+
+
+
 }

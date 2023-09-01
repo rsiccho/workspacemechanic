@@ -211,7 +211,7 @@ public class EpfOutputDialog extends BaseOutputDialog {
     }
     
     // Save the preferences into an EPF file
-    EpfFileModel epfFile = new EpfFileModel(getTitle(), getDescription(), getTaskType());
+    EpfFileModel epfFile = new EpfFileModel(getTitle(), getDescription(), getTaskType(), getXmlMode());
     
     Map<String, String> savedPreferences = getSavedPreferences();
     

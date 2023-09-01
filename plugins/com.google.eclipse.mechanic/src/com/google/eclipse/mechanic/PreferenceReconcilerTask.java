@@ -11,15 +11,17 @@ package com.google.eclipse.mechanic;
 
 import static java.lang.String.format;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.util.List;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.BackingStoreException;
 
-import java.io.File;
-import java.util.List;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.eclipse.mechanic.internal.CustomTemplateMerger;
+import com.google.eclipse.mechanic.internal.XMLMode;
 
 /**
  * Provides a base class for Tasks that reconcile values in the
@@ -111,8 +113,8 @@ public abstract class PreferenceReconcilerTask extends CompositeTask {
    * Creates a Reconciler given an opaque preference string as exported
    * by Eclipse in an EPF file.
    */
-  public Reconciler createReconciler(String key, String value) {
-    return createReconciler(parsePreference(key, value));
+  public Reconciler createReconciler(String key, String value, XMLMode xmlMode) {
+    return createReconciler(parsePreference(key, value), xmlMode);
   }
 
   private Preference parsePreference(String id, String value) {
@@ -138,18 +140,22 @@ public abstract class PreferenceReconcilerTask extends CompositeTask {
    * Returns a new Reconciler instance that will reconcile prefs that do
    * not match the value exactly.
    */
-  public Reconciler createReconciler(String path, String key,
-      String value) {
-    return createReconciler(new ImmutablePreference(path, key, value));
+  public Reconciler createReconciler(String path, String key, String value, XMLMode xmlMode) {
+    return createReconciler(new ImmutablePreference(path, key, value), xmlMode);
   }
 
   /**
    * Returns a new Reconciler instance that will reconcile prefs that do
    * not match the value exactly.
    */
-  public Reconciler createReconciler(Preference pref) {
-    return createReconciler(pref,
-        new EqualsMatcher(pref),
+  public Reconciler createReconciler(Preference pref, XMLMode xmlMode) {
+    if (XMLMode.MERGE.equals(xmlMode) && pref.getKey()
+        .equalsIgnoreCase(
+            CustomTemplateMerger.CUSTOM_TEMPLATES_PREFERENCE_KEY)) {
+      return createReconciler(pref, new XMLContainsMatcher(pref.getValue()),
+          new XMLMergeResolver(pref));
+    }
+    return createReconciler(pref, new EqualsMatcher(pref),
         new SimpleResolver(pref));
   }
 
@@ -326,6 +332,24 @@ public abstract class PreferenceReconcilerTask extends CompositeTask {
   }
 
   /**
+   * Matches when the XML subject contains the supplied value.
+   */
+  public static class XMLContainsMatcher implements Matcher {
+
+    private final String value;
+
+    public XMLContainsMatcher(String value) {
+      this.value = value;
+    }
+
+    // subject = old in preferences; this.value = new preference
+    public boolean matches(String subject) {
+      return !new CustomTemplateMerger(subject, this.value)
+          .isSomethingToMerge();
+    }
+  }
+
+  /**
    * Resolves to the value of the preference supplied in the constructor.
    */
   public static class SimpleResolver implements Resolver {
@@ -338,6 +362,23 @@ public abstract class PreferenceReconcilerTask extends CompositeTask {
 
     public String resolve(String subject) {
       return pref.getValue();
+    }
+  }
+
+  /**
+   * Resolves to the value of the preference supplied in the constructor.
+   */
+  public static class XMLMergeResolver implements Resolver {
+
+    private final Preference pref;
+
+    public XMLMergeResolver(Preference pref) {
+      this.pref = pref;
+    }
+
+    public String resolve(String subject) {
+      return new CustomTemplateMerger(pref.getValue(), subject)
+          .mergeCustomTemplates();
     }
   }
 

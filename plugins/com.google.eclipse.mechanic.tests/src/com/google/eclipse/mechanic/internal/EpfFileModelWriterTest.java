@@ -12,24 +12,26 @@ package com.google.eclipse.mechanic.internal;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import junit.framework.TestCase;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+
+import junit.framework.TestCase;
 
 /**
  * Tests for {@link EpfFileModelWriter}.
  */
 public class EpfFileModelWriterTest extends TestCase {
   public void testSimple() throws IOException {
-    EpfFileModel model = new EpfFileModel("TiTlE", "DeScRiPtIoN", TaskType.RECONCILE);
+    EpfFileModel model = new EpfFileModel("TiTlE", "DeScRiPtIoN",
+        TaskType.RECONCILE, XMLMode.OVERWRITE);
     model.addElement("first", "second");
     String actual = writeToString(model);
     assertBasics(actual);
   }
 
   public void testOnePreference() throws IOException {
-    EpfFileModel model = new EpfFileModel("TiTlE", "DeScRiPtIoN", TaskType.RECONCILE);
+    EpfFileModel model = new EpfFileModel("TiTlE", "DeScRiPtIoN",
+        TaskType.RECONCILE, XMLMode.OVERWRITE);
     model.addElement("first", "second");
     String actual = writeToString(model);
     assertBasics(actual);
@@ -37,7 +39,8 @@ public class EpfFileModelWriterTest extends TestCase {
   }
 
   public void testTwoPreferences() throws IOException {
-    EpfFileModel model = new EpfFileModel("TiTlE", "DeScRiPtIoN", TaskType.RECONCILE);
+    EpfFileModel model = new EpfFileModel("TiTlE", "DeScRiPtIoN",
+        TaskType.RECONCILE, XMLMode.OVERWRITE);
     model.addElement("first", "second");
     model.addElement("third", "fourth");
     String actual = writeToString(model);
@@ -47,7 +50,8 @@ public class EpfFileModelWriterTest extends TestCase {
   }
 
   public void testNewlineInPreferences() throws IOException {
-    EpfFileModel model = new EpfFileModel("TiTlE", "DeScRiPtIoN", TaskType.RECONCILE);
+    EpfFileModel model = new EpfFileModel("TiTlE", "DeScRiPtIoN",
+        TaskType.RECONCILE, XMLMode.OVERWRITE);
     model.addElement("key", "longline\nnewline");
     String actual = writeToString(model);
     fail("didn't test this one yet " + actual);

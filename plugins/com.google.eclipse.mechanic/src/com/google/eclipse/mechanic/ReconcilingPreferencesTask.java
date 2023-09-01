@@ -15,6 +15,8 @@ import java.util.Properties;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
+import com.google.eclipse.mechanic.internal.XMLMode;
+
 /**
  * Models an Eclipse preferences export file as a series of individual
  * preference reconcilers. If any of the reconcilers need fixing, they
@@ -25,16 +27,19 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 public abstract class ReconcilingPreferencesTask extends PreferenceReconcilerTask {
 
   private final IResourceTaskReference taskRef;
+  private XMLMode xmlMode;
 
-  public ReconcilingPreferencesTask(
-      IResourceTaskReference taskRef, IEclipsePreferences prefsRoot) throws IOException {
+  public ReconcilingPreferencesTask(IResourceTaskReference taskRef,
+      IEclipsePreferences prefsRoot) throws IOException {
     super(prefsRoot);
     this.taskRef = taskRef;
     initReconcilers();
   }
 
-  public ReconcilingPreferencesTask(IResourceTaskReference taskRef) throws IOException {
+  public ReconcilingPreferencesTask(IResourceTaskReference taskRef,
+      XMLMode xmlMode) throws IOException {
     this.taskRef = taskRef;
+    this.xmlMode = xmlMode;
     initReconcilers();
   }
 
@@ -60,7 +65,7 @@ public abstract class ReconcilingPreferencesTask extends PreferenceReconcilerTas
       // Ignore entries like "file_export_version=3.0"
       if (!id.isEmpty() && id.charAt(0) == '/') {
         String value = (String) entry.getValue();
-        addReconciler(createReconciler(id, value));
+        addReconciler(createReconciler(id, value, xmlMode));
       }
     }
   }

@@ -15,12 +15,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
 
-import com.google.eclipse.mechanic.ListCollector;
-import com.google.eclipse.mechanic.ResourceTaskScanner;
 import com.google.eclipse.mechanic.IResourceTaskProvider;
 import com.google.eclipse.mechanic.IResourceTaskReference;
 import com.google.eclipse.mechanic.LastModifiedPreferencesFileTask;
+import com.google.eclipse.mechanic.ListCollector;
 import com.google.eclipse.mechanic.ReconcilingPreferencesTask;
+import com.google.eclipse.mechanic.ResourceTaskScanner;
 import com.google.eclipse.mechanic.Task;
 import com.google.eclipse.mechanic.TaskCollector;
 import com.google.eclipse.mechanic.plugin.core.MechanicLog;
@@ -109,7 +109,7 @@ public final class PreferenceFileTaskScanner extends ResourceTaskScanner {
     private final Header header;
 
     public ReconcilingEpfTask(IResourceTaskReference taskRef, Header header) throws IOException {
-      super(taskRef);
+      super(taskRef, header.getXmlMode());
       this.header = header;
     }
 
@@ -133,7 +133,7 @@ public final class PreferenceFileTaskScanner extends ResourceTaskScanner {
 
     public LastmodEpfTask(IResourceTaskReference taskRef, Header header) {
       super(taskRef, MechanicPlugin.getDefault().getMechanicPreferences(),
-          MechanicLog.getDefault());
+          MechanicLog.getDefault(), header.getXmlMode());
       this.header = header;
     }
 
@@ -156,6 +156,7 @@ public final class PreferenceFileTaskScanner extends ResourceTaskScanner {
     private static final String TITLE_TAG = "@title";
     private static final String DESCRIPTION_TAG = "@description";
     private static final String TYPE_TAG = "@task_type";
+    private static final String XML_MODE_TAG = "@xml_mode";
 
     // Please don't use this tag in your EPF tasks.
     // Consider it deprecated, but don't remove it; it's kept for backwards compatibility.
@@ -163,6 +164,7 @@ public final class PreferenceFileTaskScanner extends ResourceTaskScanner {
 
     private final IResourceTaskReference taskRef;
     private TaskType type;
+    private XMLMode xmlMode;
     private String title;
     private String description;
 
@@ -171,6 +173,7 @@ public final class PreferenceFileTaskScanner extends ResourceTaskScanner {
 
       // give the file friendly default values
       type = TaskType.LASTMOD;
+      xmlMode = XMLMode.OVERWRITE;
       title = "Import preferences from: " + taskRef.getName();
       description = "Imports the preferences from: " + taskRef.getPath();
     }
@@ -259,10 +262,20 @@ public final class PreferenceFileTaskScanner extends ResourceTaskScanner {
       if (i == 0) {
         type = TaskType.valueOf(line.substring(TYPE_TAG.length()).trim());
       }
+
+      // Checking for new @xml_mode tag.
+      i = line.indexOf(XML_MODE_TAG);
+      if (i == 0) {
+        xmlMode = XMLMode.valueOf(line.substring(XML_MODE_TAG.length()).trim());
+      }
     }
 
     public TaskType getType() {
       return type;
+    }
+
+    public XMLMode getXmlMode() {
+      return xmlMode;
     }
 
     public String getDescription() {
@@ -280,6 +293,7 @@ public final class PreferenceFileTaskScanner extends ResourceTaskScanner {
   interface Header {
 
     public TaskType getType();
+    public XMLMode getXmlMode();
     public String getDescription();
     public String getTitle();
 

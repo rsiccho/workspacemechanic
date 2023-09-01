@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Text;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.eclipse.mechanic.internal.TaskType;
+import com.google.eclipse.mechanic.internal.XMLMode;
 import com.google.eclipse.mechanic.plugin.core.MechanicPlugin;
 
 /**
@@ -50,7 +51,8 @@ public abstract class BaseOutputDialog extends Dialog {
   enum Component {
     TITLE,
     DESCRIPTION,
-    TASK_TYPE
+    TASK_TYPE, 
+    XML_MODE
   }
 
   private final String extension;
@@ -60,6 +62,7 @@ public abstract class BaseOutputDialog extends Dialog {
   private Text titleText;
   private Text descriptionText;
   private Combo taskTypeCombo;
+  private Combo xmlModeCombo;
   private Text savedLocationText;
 
   /**
@@ -115,7 +118,9 @@ public abstract class BaseOutputDialog extends Dialog {
     }
     IDialogSettings settings = MechanicPlugin.getDefault().getDialogSettings();
     IDialogSettings section = settings.getSection(dialogSettingsSection);
-    if (section == null) section = settings.addNewSection(dialogSettingsSection);
+    if (section == null) {
+      section = settings.addNewSection(dialogSettingsSection);
+    }
     return section;
   }
 
@@ -187,6 +192,19 @@ public abstract class BaseOutputDialog extends Dialog {
       taskTypeCombo.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, true, false, 2, 1));
       taskTypeCombo.addModifyListener(validateOnChange);
       taskTypeCombo.setEnabled(components.contains(Component.TASK_TYPE));
+    }
+
+    if (components.contains(Component.XML_MODE)) {
+      createLabel(container, "XML-Mode:");
+      xmlModeCombo = new Combo(container, SWT.DROP_DOWN | SWT.READ_ONLY);
+      // Ensuring the order hasn't changed, as we rely on that.
+      Preconditions.checkState(TaskType.values()[0] == TaskType.LASTMOD);
+      xmlModeCombo.setItems(new String[] { "Overwrite", "Merge" });
+      xmlModeCombo.select(0);
+      xmlModeCombo.setLayoutData(
+          new GridData(SWT.BEGINNING, SWT.CENTER, true, false, 2, 1));
+      xmlModeCombo.addModifyListener(validateOnChange);
+      xmlModeCombo.setEnabled(components.contains(Component.XML_MODE));
     }
 
     // Add saved file location
@@ -358,6 +376,18 @@ public abstract class BaseOutputDialog extends Dialog {
 
   public void setTaskType(TaskType taskType) {
     taskTypeCombo.select(Arrays.asList(TaskType.values()).indexOf(taskType));
+  }
+
+  /**
+   * Get xml mode provided by the user. Only valid after the dialog has been
+   * created.
+   */
+  public XMLMode getXmlMode() {
+    return XMLMode.values()[xmlModeCombo.getSelectionIndex()];
+  }
+
+  public void setXmlMode(XMLMode xmlMode) {
+    xmlModeCombo.select(Arrays.asList(XMLMode.values()).indexOf(xmlMode));
   }
 
   public String getLocation() {
